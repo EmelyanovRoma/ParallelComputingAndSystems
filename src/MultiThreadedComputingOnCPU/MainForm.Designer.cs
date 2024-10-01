@@ -61,6 +61,7 @@
             this.ImagePictureBox.Location = new System.Drawing.Point(-1, -1);
             this.ImagePictureBox.Name = "ImagePictureBox";
             this.ImagePictureBox.Size = new System.Drawing.Size(100, 50);
+            this.ImagePictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.ImagePictureBox.TabIndex = 0;
             this.ImagePictureBox.TabStop = false;
             // 
@@ -73,6 +74,7 @@
             this.ClearPictureBoxButton.TabIndex = 1;
             this.ClearPictureBoxButton.Text = "Clear";
             this.ClearPictureBoxButton.UseVisualStyleBackColor = true;
+            this.ClearPictureBoxButton.Click += new System.EventHandler(this.ClearPictureBoxButton_Click);
             // 
             // SaveImageButton
             // 
@@ -83,6 +85,7 @@
             this.SaveImageButton.TabIndex = 2;
             this.SaveImageButton.Text = "Save";
             this.SaveImageButton.UseVisualStyleBackColor = true;
+            this.SaveImageButton.Click += new System.EventHandler(this.SaveImageButton_Click);
             // 
             // OpenImageButton
             // 
@@ -93,6 +96,7 @@
             this.OpenImageButton.TabIndex = 3;
             this.OpenImageButton.Text = "Open";
             this.OpenImageButton.UseVisualStyleBackColor = true;
+            this.OpenImageButton.Click += new System.EventHandler(this.OpenImageButton_Click);
             // 
             // EroseImageButton
             // 
@@ -102,6 +106,7 @@
             this.EroseImageButton.TabIndex = 4;
             this.EroseImageButton.Text = "Erose";
             this.EroseImageButton.UseVisualStyleBackColor = true;
+            this.EroseImageButton.Click += new System.EventHandler(this.EroseImageButton_Click);
             // 
             // ImageProcessingTimeTextBox
             // 
@@ -124,10 +129,17 @@
             this.BlurImageButton.TabIndex = 6;
             this.BlurImageButton.Text = "Blur";
             this.BlurImageButton.UseVisualStyleBackColor = true;
+            this.BlurImageButton.Click += new System.EventHandler(this.BlurImageButton_Click);
+            // 
+            // ImageOpenFileDialog
+            // 
+            this.ImageOpenFileDialog.Title = "Open Image";
             // 
             // ImageSaveFileDialog
             // 
-            this.ImageSaveFileDialog.FileName = "Untitled";
+            this.ImageSaveFileDialog.FileName = "Untitled.png";
+            this.ImageSaveFileDialog.Filter = "PNG Image|*.png|JPEG Image|*.jpg|Bitmap Image|*.bmp";
+            this.ImageSaveFileDialog.Title = "Save Image";
             // 
             // NumberOfThreadsComboBox
             // 
@@ -161,6 +173,7 @@
             this.Name = "MainForm";
             this.Text = "MainForm";
             this.PictureBoxPanel.ResumeLayout(false);
+            this.PictureBoxPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ImagePictureBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
