@@ -10,13 +10,15 @@ using System.Threading.Tasks;
 namespace MultiThreadedComputingOnCPU
 {
     public static class Filters
-    {
+    {       
         public static class Erosion
-        {         
+        {
+            private const int _threads = 12;
+
             public static double[,] CalculateIntensivityOfImage(Bitmap bitmap)
             {
                 BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                                                        ImageLockMode.ReadWrite, bitmap.PixelFormat);
+                                                    ImageLockMode.ReadWrite, bitmap.PixelFormat);
                 int bytesPerPixel = Image.GetPixelFormatSize(bitmap.PixelFormat) / 8;
                 int byteCount = bitmapData.Stride * bitmap.Height;
                 byte[] pixels = new byte[byteCount];
@@ -28,7 +30,7 @@ namespace MultiThreadedComputingOnCPU
                 int width = bitmap.Width;
                 double[,] intensivityMatrixImage = new double[width, height];
 
-                Parallel.For(0, height, new ParallelOptions { MaxDegreeOfParallelism = 16 }, y =>
+                Parallel.For(0, height, new ParallelOptions { MaxDegreeOfParallelism = _threads }, y =>
                 {
                     int yIndex = y * bitmapData.Stride;
                     for (int x = 0; x < width; x++)
@@ -59,9 +61,9 @@ namespace MultiThreadedComputingOnCPU
             {
                 int width = intensivity.GetLength(0);
                 int height = intensivity.GetLength(1);
-                int[,] binaryImage = new int[width, height];
+                var binaryImage = new int[width, height];
 
-                Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = 16 }, x =>
+                Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = _threads }, x =>
                 {
                     for (int y = 0; y < height; y++)
                     {
@@ -89,7 +91,7 @@ namespace MultiThreadedComputingOnCPU
                 byte[] pixels = new byte[byteCount];
 
                 // Параллельная обработка для ускорения
-                Parallel.For(0, height, new ParallelOptions { MaxDegreeOfParallelism = 16 }, y =>
+                Parallel.For(0, height, new ParallelOptions { MaxDegreeOfParallelism = _threads }, y =>
                 {
                     int yOffset = y * stride;
                     for (int x = 0; x < width; x++)
@@ -121,7 +123,7 @@ namespace MultiThreadedComputingOnCPU
                 int[,] intermediateImage = new int[width, height];
                 int[,] erodedImage = new int[width, height];
 
-                Parallel.For(0, height, new ParallelOptions { MaxDegreeOfParallelism = 12 }, y =>
+                Parallel.For(0, height, new ParallelOptions { MaxDegreeOfParallelism = _threads }, y =>
                 {
                     for (int x = 0; x < width; x++)
                     {
@@ -139,7 +141,7 @@ namespace MultiThreadedComputingOnCPU
                     }
                 });
 
-                Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = 12 }, x =>
+                Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = _threads }, x =>
                 {
                     for (int y = 0; y < height; y++)
                     {
@@ -162,19 +164,11 @@ namespace MultiThreadedComputingOnCPU
 
             public static Bitmap ApplyErossion(Bitmap image)
             {
-                Bitmap newImage;
-                double[,] intensivityMat;
-                int[,] binaryImage;
-
-                intensivityMat = CalculateIntensivityOfImage(image);
-
-                ParallelOptions parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 12 };
-
-                binaryImage = ApplyThreshold(intensivityMat, 150);
-                int[,] erodedImage = Erose(binaryImage, 1, parallelOptions);
-                newImage = ConvertBinaryImageToBitmap(erodedImage);
-
-                return newImage;
+                var intensivityMat = CalculateIntensivityOfImage(image);
+                var binaryImage = ApplyThreshold(intensivityMat, 150);
+                var erodedImage = Erose(binaryImage, 1, new ParallelOptions { MaxDegreeOfParallelism = _threads });
+                image.Dispose();
+                return ConvertBinaryImageToBitmap(erodedImage);
             }
         }
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
@@ -21,7 +22,18 @@ namespace MultiThreadedComputingOnCPU
 
         private void EroseImageButton_Click(object sender, EventArgs e)
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
 
+            ImagePictureBox.Image = 
+                Filters.Erosion.ApplyErossion((Bitmap)ImagePictureBox.Image);
+
+            stopwatch.Stop();
+            TimeSpan ts = stopwatch.Elapsed;
+
+            ImageProcessingTimeTextBox.Text = 
+                ts.Seconds.ToString() + "." +
+                ts.Milliseconds.ToString() + " sec";
         }
 
         private void BlurImageButton_Click(object sender, EventArgs e)
@@ -96,7 +108,9 @@ namespace MultiThreadedComputingOnCPU
 
         private void ClearPictureBox()
         {
-            ImagePictureBox.Image = null;
+            ImagePictureBox.Image.Dispose();
+            ImagePictureBox.Image = null;    
+            ImageProcessingTimeTextBox.Text = null;
         }
     }
 }
