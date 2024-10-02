@@ -10,11 +10,12 @@ using System.Threading.Tasks;
 namespace MultiThreadedComputingOnCPU
 {
     public static class Filters
-    {       
-        public static class Erosion
-        {
-            private const int _threads = 12;
+    {
+        public static int Threads { set; get; }
 
+
+        public static class Erosion
+        {          
             public static double[,] CalculateIntensivityOfImage(Bitmap bitmap)
             {
                 BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height),
@@ -30,7 +31,7 @@ namespace MultiThreadedComputingOnCPU
                 int width = bitmap.Width;
                 double[,] intensivityMatrixImage = new double[width, height];
 
-                Parallel.For(0, height, new ParallelOptions { MaxDegreeOfParallelism = _threads }, y =>
+                Parallel.For(0, height, new ParallelOptions { MaxDegreeOfParallelism = Threads }, y =>
                 {
                     int yIndex = y * bitmapData.Stride;
                     for (int x = 0; x < width; x++)
@@ -38,15 +39,11 @@ namespace MultiThreadedComputingOnCPU
                         int xIndex = x * bytesPerPixel;
                         int index = yIndex + xIndex;
 
-                        // Получение значений цветов пикселя
                         byte blue = pixels[index];
                         byte green = pixels[index + 1];
                         byte red = pixels[index + 2];
 
-                        // Расчет интенсивности (яркости) пикселя
                         double intensity = (red + green + blue) / 3;
-
-                        // Сохранение в матрицу
                         intensivityMatrixImage[x, y] = intensity;
                     }
                 });
@@ -63,7 +60,7 @@ namespace MultiThreadedComputingOnCPU
                 int height = intensivity.GetLength(1);
                 var binaryImage = new int[width, height];
 
-                Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = _threads }, x =>
+                Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = Threads }, x =>
                 {
                     for (int y = 0; y < height; y++)
                     {
@@ -80,7 +77,6 @@ namespace MultiThreadedComputingOnCPU
                 int height = binaryImage.GetLength(1);
                 Bitmap resultImage = new Bitmap(width, height, PixelFormat.Format24bppRgb);
 
-                // Заблокировать биты для прямого доступа к пикселям
                 BitmapData bitmapData = resultImage.LockBits(new Rectangle(0, 0, width, height),
                                                              ImageLockMode.WriteOnly, resultImage.PixelFormat);
 
@@ -90,8 +86,7 @@ namespace MultiThreadedComputingOnCPU
                 int byteCount = stride * height;
                 byte[] pixels = new byte[byteCount];
 
-                // Параллельная обработка для ускорения
-                Parallel.For(0, height, new ParallelOptions { MaxDegreeOfParallelism = _threads }, y =>
+                Parallel.For(0, height, new ParallelOptions { MaxDegreeOfParallelism = Threads }, y =>
                 {
                     int yOffset = y * stride;
                     for (int x = 0; x < width; x++)
@@ -99,31 +94,28 @@ namespace MultiThreadedComputingOnCPU
                         int xOffset = x * bytesPerPixel;
                         int pixelIndex = yOffset + xOffset;
 
-                        // Установка пикселя в зависимости от значения в binaryImage
                         byte colorValue = (binaryImage[x, y] == 1) ? (byte)255 : (byte)0;
 
-                        // Цвет для белого пикселя (255, 255, 255) и черного (0, 0, 0)
                         pixels[pixelIndex] = colorValue;     // Blue
                         pixels[pixelIndex + 1] = colorValue; // Green
                         pixels[pixelIndex + 2] = colorValue; // Red
                     }
                 });
 
-                // Копируем измененные данные обратно в изображение
                 Marshal.Copy(pixels, 0, ptrFirstPixel, byteCount);
                 resultImage.UnlockBits(bitmapData);
 
                 return resultImage;
             }            
 
-            private static int[,] Erose(int[,] binaryImage, int step, ParallelOptions parallelOptions)
+            private static int[,] Erose(int[,] binaryImage, int step)
             {
                 int width = binaryImage.GetLength(0);
                 int height = binaryImage.GetLength(1);
                 int[,] intermediateImage = new int[width, height];
                 int[,] erodedImage = new int[width, height];
 
-                Parallel.For(0, height, new ParallelOptions { MaxDegreeOfParallelism = _threads }, y =>
+                Parallel.For(0, height, new ParallelOptions { MaxDegreeOfParallelism = Threads }, y =>
                 {
                     for (int x = 0; x < width; x++)
                     {
@@ -141,7 +133,7 @@ namespace MultiThreadedComputingOnCPU
                     }
                 });
 
-                Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = _threads }, x =>
+                Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = Threads }, x =>
                 {
                     for (int y = 0; y < height; y++)
                     {
@@ -166,7 +158,7 @@ namespace MultiThreadedComputingOnCPU
             {
                 var intensivityMat = CalculateIntensivityOfImage(image);
                 var binaryImage = ApplyThreshold(intensivityMat, 150);
-                var erodedImage = Erose(binaryImage, 1, new ParallelOptions { MaxDegreeOfParallelism = _threads });
+                var erodedImage = Erose(binaryImage, 1);
                 image.Dispose();
                 return ConvertBinaryImageToBitmap(erodedImage);
             }

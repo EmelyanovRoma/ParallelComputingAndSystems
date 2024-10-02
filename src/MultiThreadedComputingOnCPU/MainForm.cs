@@ -18,6 +18,7 @@ namespace MultiThreadedComputingOnCPU
         {
             InitializeComponent();
             NumberOfThreadsComboBox.SelectedIndex = 0;
+            Filters.Threads = 2;
         }
 
         private void EroseImageButton_Click(object sender, EventArgs e)
@@ -34,6 +35,7 @@ namespace MultiThreadedComputingOnCPU
             ImageProcessingTimeTextBox.Text = 
                 ts.Seconds.ToString() + "." +
                 ts.Milliseconds.ToString() + " sec";
+
         }
 
         private void BlurImageButton_Click(object sender, EventArgs e)
@@ -54,6 +56,11 @@ namespace MultiThreadedComputingOnCPU
         private void ClearPictureBoxButton_Click(object sender, EventArgs e)
         {
             ClearPictureBox();
+        }
+
+        private void NumberOfThreadsComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Filters.Threads = NumberOfThreadsComboBox.SelectedIndex;
         }
 
         private void OpenImage()

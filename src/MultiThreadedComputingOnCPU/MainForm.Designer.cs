@@ -156,6 +156,7 @@
             this.NumberOfThreadsComboBox.Name = "NumberOfThreadsComboBox";
             this.NumberOfThreadsComboBox.Size = new System.Drawing.Size(41, 21);
             this.NumberOfThreadsComboBox.TabIndex = 7;
+            this.NumberOfThreadsComboBox.SelectedIndexChanged += new System.EventHandler(this.NumberOfThreadsComboBox_SelectedIndexChanged);
             // 
             // MainForm
             // 
