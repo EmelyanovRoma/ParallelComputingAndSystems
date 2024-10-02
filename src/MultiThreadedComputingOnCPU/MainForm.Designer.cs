@@ -151,6 +151,7 @@
             "8",
             "10",
             "12",
+            "14",
             "16"});
             this.NumberOfThreadsComboBox.Location = new System.Drawing.Point(164, 9);
             this.NumberOfThreadsComboBox.Name = "NumberOfThreadsComboBox";
