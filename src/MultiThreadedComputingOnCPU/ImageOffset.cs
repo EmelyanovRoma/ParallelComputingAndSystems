@@ -6,6 +6,9 @@ using System.Runtime.InteropServices;
 
 namespace MultiThreadedComputingOnCPU
 {
+    /// <summary>
+    /// Описывает перенос изображения по осям X и Y.
+    /// </summary>
     public static class ImageOffset
     {
         /// <summary>
@@ -13,6 +16,13 @@ namespace MultiThreadedComputingOnCPU
         /// </summary>
         public static int Threads { set; get; }
 
+        /// <summary>
+        /// Применяет шаг переноса по осям X и Y к изображению.
+        /// </summary>
+        /// <param name="image">Исходное изображение.</param>
+        /// <param name="xOffset">Шаг переноса для оси X.</param>
+        /// <param name="yOffset">Шаг переноса для оси Y.</param>
+        /// <returns>Изображение с переносом пикселей.</returns>
         public static Bitmap ApplyOffset(
             Bitmap image,
             int xOffset,
