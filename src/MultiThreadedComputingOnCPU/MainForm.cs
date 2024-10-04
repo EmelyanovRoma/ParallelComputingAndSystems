@@ -8,17 +8,21 @@ namespace MultiThreadedComputingOnCPU
 {
     public partial class MainForm : Form
     {
+        private int _threads;
+
         public MainForm()
         {
             InitializeComponent();
             NumberOfThreadsComboBox.SelectedIndex = 0;
-            Filters.Threads = 2;
+            _threads = int.Parse(NumberOfThreadsComboBox.SelectedItem.ToString());
         }
 
         private void EroseImageButton_Click(object sender, EventArgs e)
         {
+            Filters.Threads = _threads;
+
             Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+            stopwatch.Start();            
 
             ImagePictureBox.Image = 
                 Filters.Erosion.ApplyErossion((Bitmap)ImagePictureBox.Image);
@@ -34,7 +38,25 @@ namespace MultiThreadedComputingOnCPU
 
         private void BlurImageButton_Click(object sender, EventArgs e)
         {
+            ImageOffset.Threads = _threads;
 
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            ImagePictureBox.Image = 
+                ImageOffset.ApplyOffset((Bitmap)ImagePictureBox.Image, 300, 300);
+
+            stopwatch.Stop();
+            TimeSpan ts = stopwatch.Elapsed;
+
+            ImageProcessingTimeTextBox.Text =
+                ts.Seconds.ToString() + "." +
+                ts.Milliseconds.ToString() + " sec";
+        }
+
+        private void NumberOfThreadsComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _threads = int.Parse(NumberOfThreadsComboBox.SelectedItem.ToString());
         }
 
         private void OpenImageButton_Click(object sender, EventArgs e)
@@ -50,12 +72,6 @@ namespace MultiThreadedComputingOnCPU
         private void ClearPictureBoxButton_Click(object sender, EventArgs e)
         {
             ClearPictureBox();
-        }
-
-        private void NumberOfThreadsComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            Filters.Threads = 
-                int.Parse(NumberOfThreadsComboBox.SelectedItem.ToString());
         }
 
         private void OpenImage()
@@ -113,6 +129,6 @@ namespace MultiThreadedComputingOnCPU
             ImagePictureBox.Image.Dispose();
             ImagePictureBox.Image = null;    
             ImageProcessingTimeTextBox.Text = null;
-        }
+        }        
     }
 }
