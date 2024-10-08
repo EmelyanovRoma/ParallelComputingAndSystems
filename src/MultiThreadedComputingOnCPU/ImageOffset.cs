@@ -47,7 +47,7 @@ namespace MultiThreadedComputingOnCPU
             int byteCount = bitmapData.Stride * height;
             byte[] originalPixels = new byte[byteCount];
             byte[] newPixels = new byte[byteCount];
-
+            
             IntPtr ptrFirstPixel = bitmapData.Scan0;
             IntPtr ptrNewFirstPixel = newBitmapData.Scan0;
 

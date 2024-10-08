@@ -220,5 +220,105 @@ namespace MultiThreadedComputingOnCPU
                 return ConvertBinaryImageToBitmap(erodedImage);
             }
         }
+
+        /// <summary>
+        /// Описывает фильтр размытия.
+        /// </summary>
+        public static class Blur
+        {  
+            /// <summary>
+            /// Ядро свертки размытия.
+            /// </summary>
+            private static int[,] _kernel = {
+                { 0, 0, 0, 0, 0},
+                { 0, 1, 1, 1, 0},
+                { 0, 1, 1, 1, 0},
+                { 0, 1, 1, 1, 0},
+                { 0, 0, 0, 0, 0}
+            };
+
+            /// <summary>
+            /// Применяет фильтр размытия к изображени.
+            /// </summary>
+            /// <param name="image">Исходное изображение.</param>
+            /// <returns>Изображение с размытием.</returns>
+            public static Bitmap ApplyBlur(Bitmap image)
+            {
+                int width = image.Width;
+                int height = image.Height;
+                int kernelSize = _kernel.GetLength(0);
+                int kernelSum = 9;
+                int radius = kernelSize / 2;
+                Bitmap newImage = new Bitmap(width, height);                
+
+                BitmapData bitmapData = image.LockBits(
+                    new Rectangle(0, 0, width, height),
+                    ImageLockMode.ReadOnly,
+                    newImage.PixelFormat);
+
+                BitmapData newBitmapData = newImage.LockBits(
+                    new Rectangle(0, 0, width, height),
+                    ImageLockMode.WriteOnly,
+                    image.PixelFormat);
+
+                int bytesPerPixel = Image.GetPixelFormatSize(image.PixelFormat) / 8;
+                int byteCount = bitmapData.Stride * height;
+                byte[] originalPixels = new byte[byteCount];
+                byte[] newPixels = new byte[byteCount];
+
+                IntPtr ptrFirstPixel = bitmapData.Scan0;
+                IntPtr ptrNewFirstPixel = newBitmapData.Scan0;
+
+                Marshal.Copy(bitmapData.Scan0, originalPixels, 0, originalPixels.Length);
+
+                Parallel.For(
+                    radius,
+                    height - radius,
+                    new ParallelOptions { MaxDegreeOfParallelism = Threads },
+                    y =>
+                {
+                    for (int x = radius; x < width - radius; x++)
+                    {
+                        int r = 0, g = 0, b = 0;
+
+                        for (int i = -radius; i <= radius; i++)
+                        {
+                            for (int j = -radius; j <= radius; j++)
+                            {
+                                int pixelX = (x + i) * bytesPerPixel;
+                                int pixelY = (y + j) * bitmapData.Stride;
+                                int index = pixelY + pixelX;
+
+                                int weight = _kernel[i + radius, j + radius];
+                                b += originalPixels[index] * weight;
+                                g += originalPixels[index + 1] * weight;
+                                r += originalPixels[index + 2] * weight;
+                            }
+                        }
+
+                        r = Math.Min(255, Math.Max(0, r / kernelSum));
+                        g = Math.Min(255, Math.Max(0, g / kernelSum));
+                        b = Math.Min(255, Math.Max(0, b / kernelSum));
+
+                        int resultIndex = y * newBitmapData.Stride + x * bytesPerPixel;
+
+                        newPixels[resultIndex] = (byte)b;
+                        newPixels[resultIndex + 1] = (byte)g;
+                        newPixels[resultIndex + 2] = (byte)r;
+                        if (bytesPerPixel == 4)
+                            newPixels[resultIndex + 3] = 255;
+                    }
+                });
+
+                Marshal.Copy(newPixels, 0, newBitmapData.Scan0, newPixels.Length);
+
+                image.UnlockBits(bitmapData);
+                newImage.UnlockBits(newBitmapData);
+
+                image.Dispose();
+
+                return newImage;
+            }
+        }
     }
 }

@@ -38,6 +38,7 @@ namespace MultiThreadedComputingOnCPU
 
         private void BlurImageButton_Click(object sender, EventArgs e)
         {
+            Filters.Threads = _threads;
             ImageOffset.Threads = _threads;
 
             Stopwatch stopwatch = new Stopwatch();
@@ -45,6 +46,9 @@ namespace MultiThreadedComputingOnCPU
 
             ImagePictureBox.Image = 
                 ImageOffset.ApplyOffset((Bitmap)ImagePictureBox.Image, 300, 300);
+
+            ImagePictureBox.Image =
+                Filters.Blur.ApplyBlur((Bitmap)ImagePictureBox.Image);
 
             stopwatch.Stop();
             TimeSpan ts = stopwatch.Elapsed;
