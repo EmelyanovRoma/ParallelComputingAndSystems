@@ -3,10 +3,37 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
+const int THRESHOLD = 150;
+const int EROSION_STEP = 1;
+
 using namespace std;
+using namespace cv;
 
 bool CheckCUDACapableGPU();
 void ShowDeviceProperties();
+Mat OpenImage(string imgPath);
+void SaveImage(Mat img);
+
+int main()
+{
+    if (!CheckCUDACapableGPU())
+        return 0;
+
+    ShowDeviceProperties();
+
+    string imgPath = "image1.jpg";
+    Mat img = OpenImage(imgPath);
+    Size imgSize;    
+
+    imgSize.width = img.cols;
+    imgSize.height = img.rows;
+
+    cout << "Image Dimensions: " << imgSize.width << "x" << imgSize.height << endl;
+
+    SaveImage(img);
+
+    return 0;
+}
 
 bool CheckCUDACapableGPU()
 {
@@ -15,7 +42,7 @@ bool CheckCUDACapableGPU()
 
     if (deviceCount == 0)
     {
-        cout << "No CUDA-capable GPU detected." << endl;
+        cerr << "No CUDA-capable GPU detected." << endl;
         return false;
     }
 
@@ -42,12 +69,26 @@ void ShowDeviceProperties()
     }
 }
 
-int main() 
-{    
-    if (!CheckCUDACapableGPU())
-        return 0;
+Mat OpenImage(string imgPath)
+{
+    Mat img = imread(imgPath, IMREAD_COLOR);
 
-    ShowDeviceProperties();
+    if (img.empty())
+    {
+        cerr << "Error loading image." << endl;
+        exit(1);
+    }        
 
-    return 0;
+    return img;
+}
+
+void SaveImage(Mat img)
+{
+    if (!imwrite("result_" + to_string(img.cols) + "x" + to_string(img.rows) + ".jpg", img))
+    {
+        cerr << "Error saving image." << endl;
+        exit(1);
+    }       
+
+    cout << "Image saved successfully." << endl;
 }
