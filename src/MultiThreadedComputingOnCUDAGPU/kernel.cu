@@ -8,15 +8,70 @@ using namespace std;
 using namespace cv;
 using namespace chrono;
 
-__global__ void CalculateIntensity(const uchar3* input,float* intensity, Size imgSize);
+/// <summary>
+/// Вычисляет интенсивность пикселей изображения.
+/// </summary>
+/// <param name="input">Исходное изображение.</param>
+/// <param name="intensity">Массив интенсивности пикселей.</param>
+/// <param name="imgSize">Размеры изображения.</param>
+__global__ void CalculateIntensity(const uchar3* input, float* intensity, Size imgSize);
+
+/// <summary>
+/// Применяет значение порога для формирования матрицы из 0 и 1.
+/// </summary>
+/// <param name="intensity">Массив интенсивности пикселей.</param>
+/// <param name="binary">Бинарное изображение.</param>
+/// <param name="imgSize">Размеры изображения.</param>
+/// <param name="threshold">Значение порога.</param>
 __global__ void ApplyThreshold(float* intensity, uchar* binary, Size imgSize, float threshold);
+
+/// <summary>
+/// Выполняет эрозию изображения.
+/// </summary>
+/// <param name="binary">Бинарное изображение.</param>
+/// <param name="output">Изображение с эрозией.</param>
+/// <param name="imgSize">Размеры изображения.</param>
+/// <param name="step">Шаг эрозии.</param>
 __global__ void Erosion(const uchar* binary, uchar* output, Size imgSize, int step);
+
+/// <summary>
+/// Создает черно-белое изображение.
+/// </summary>
+/// <param name="binary">Бинарное изображение.</param>
+/// <param name="output">Черно-белое изображение.</param>
+/// <param name="imgSize">Размеры изображения.</param>
 __global__ void CreateBinaryImage(const uchar* binary, uchar3* output, Size imgSize);
 
+/// <summary>
+/// Применяет алгоритм эрозии к исходному изображению.
+/// </summary>
+/// <param name="input">Исходное изображение.</param>
+/// <param name="imgSize">Размеры изображения.</param>
+/// <returns>Изображение с эрозией.</returns>
 Mat ProcessImage(const Mat& input, Size imgSize);
+
+/// <summary>
+/// Проверяет наличие в системе GPU с поддержкой CUDA.
+/// </summary>
+/// <returns>true - есть, false - нет.</returns>
 bool CheckCUDACapableGPU();
+
+/// <summary>
+/// Отображает некоторые характеристики GPU с поддержкой CUDA.
+/// </summary>
 void ShowDeviceProperties();
+
+/// <summary>
+/// Открывает изображение при помощи библиотеки OpenCV.
+/// </summary>
+/// <param name="imgPath">Путь до изображения.</param>
+/// <returns>Загруженное изображение.</returns>
 Mat OpenImage(string imgPath);
+
+/// <summary>
+/// Сохраняет изображение при помощи библиотеки OpenCV.
+/// </summary>
+/// <param name="img">Изображение для сохранения.</param>
 void SaveImage(Mat img);
 
 int main()
