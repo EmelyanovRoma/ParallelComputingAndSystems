@@ -2,9 +2,11 @@
 #include <opencv2/opencv.hpp>
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
+#include <chrono>
 
 using namespace std;
 using namespace cv;
+using namespace chrono;
 
 __global__ void CalculateIntensity(const uchar3* input,float* intensity, Size imgSize);
 __global__ void ApplyThreshold(float* intensity, uchar* binary, Size imgSize, float threshold);
@@ -27,7 +29,6 @@ int main()
     Size imgSize(img.cols, img.rows); 
 
     img = ProcessImage(img, imgSize);
-
     SaveImage(img);
 
     return 0;
@@ -55,12 +56,17 @@ Mat ProcessImage(const Mat& image, Size imgSize)
         (imgSize.width + threads.x - 1) / threads.x,
         (imgSize.height + threads.y - 1) / threads.y);
 
+    auto start = high_resolution_clock::now();
     CalculateIntensity << <blocks, threads >> > (input, intensity, imgSize);
     ApplyThreshold << <blocks, threads >> > (intensity, binary, imgSize, 150);
     Erosion << <blocks, threads >> > (binary, erosion, imgSize, 1);
     CreateBinaryImage << <blocks, threads >> > (erosion, output, imgSize);
 
     cudaDeviceSynchronize();
+
+    auto end = high_resolution_clock::now();
+    double processingTime = duration_cast<milliseconds>(end - start).count();
+    cout << processingTime / 1000 << " sec." << endl;
 
     Mat result(imgSize.height, imgSize.width, CV_8UC3);
     cudaMemcpy(result.ptr<uchar3>(), output,
